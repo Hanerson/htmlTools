@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HANERSON // HTML.TOOLS</title>
+    <link rel="stylesheet" href="./css/global.css">
+    <style>
+        .header {
+            border-bottom: 4px double #000000;
+            padding-bottom: 1rem;
+            margin-bottom: 2.5rem;
+        }
+        .title {
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        .subtitle {
+            font-size: 0.9rem;
+            color: #666666;
+            margin-top: 0.25rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
+        }
+        .tool-card {
+            border: 2px solid #000000;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: #000000;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 140px;
+        }
+        .tool-card:hover {
+            background: #f5f5f5;
+            outline: 2px dashed #000000;
+            outline-offset: 2px;
+        }
+        .tool-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .tool-desc {
+            font-size: 0.8rem;
+            color: #555555;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <main class="grid">
+        <a href="/tools/flashcard/bianyi" class="tool-card">
+            <div>
+                <div class="tool-name">编译原理抽背卡</div>
+                <div class="tool-desc">Context-Free 核心概念与常考名词解释速记。</div>
+            </div>
+            <span style="font-size: 0.8rem; font-weight: 700; margin-top: 1rem; text-align: right;">RUN -></span>
+        </a>
+    </main>
+</div>
+</body>
+</html>
