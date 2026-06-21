@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>编译原理 · 名词解释抽背卡</title>
+    <link rel="stylesheet" href="../../css/global.css">
+    <style>
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px dashed #000000;
+            padding-bottom: 1rem;
+        }
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            color: #000000;
+            margin-bottom: 0.5rem;
+        }
+        .sub {
+            color: #666666;
+            font-size: 0.8rem;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border: 2px solid #000000;
+            padding: 0.5rem 1rem;
+            background: #fafafa;
+        }
+        .counter {
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        /* 纯黑白硬朗卡片 */
+        .card {
+            background: #ffffff;
+            border: 2px solid #000000;
+            padding: 3rem 2rem;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        .card:hover {
+            background: #fcfcfc;
+            outline: 2px dashed #000000;
+            outline-offset: 4px;
+        }
+        .term {
+            font-size: 2.2rem;
+            font-weight: 900;
+            text-align: center;
+            word-break: break-word;
+        }
+        .definition {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #000000;
+            text-align: left;
+            width: 100%;
+            max-width: 600px;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 2px dashed #000000;
+            word-break: break-word;
+        }
+        .card-footer-hint {
+            position: absolute;
+            bottom: 0.5rem;
+            font-size: 0.7rem;
+            color: #666666;
+            text-transform: uppercase;
+        }
+
+        .nav-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .key-hint {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #666666;
+            border-top: 1px solid #000000;
+            padding-top: 1rem;
+            margin-top: 2rem;
+        }
+
+        .back-home {
+            display: inline-block;
+            margin-bottom: 1rem;
+            text-decoration: none;
+            color: #000000;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        .back-home:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 550px) {
+            .card { padding: 2rem 1rem; min-height: 240px; }
+            .term { font-size: 1.6rem; }
+            .definition { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="/" class="back-home">◀ RETURN TO INDEX</a>
+
+    <div class="header">
+        <h1>COMPILER_PRINCIPLE // 名词解释</h1>
+        <div class="sub">Context-Free Grammar & Automata Flashcards</div>
+    </div>
+
+    <div class="stats-bar">
+        <span class="counter" id="progressCounter">0 / 0</span>
+        <button id="shuffleBtn">🎲 RANDOM_SHUFFLE</button>
+    </div>
+
+    <div class="card" id="flashcard">
+        <div class="term" id="termDisplay">LOADING...</div>
+        <div class="definition" id="defDisplay" style="display: none;"></div>
+        <div class="card-footer-hint">[ CLICK TO TOGGLE ANSWER ]</div>
+    </div>
+
+    <div class="nav-buttons">
+        <button id="prevBtn">◀ PREV_CARD</button>
+        <button id="nextBtn">NEXT_CARD ▶</button>
+    </div>
+
+    <div class="key-hint">
+        SHORTCUTS: ← PREV_CARD  |  → NEXT_CARD  |  ↑ / SPACE TOGGLE
+    </div>
+</div>
+
+<script>
+    // 保持你原有的干净、纯 JS 数据逻辑不变
+    const TERMS_DATA = [
+        { term: "软件工程", definition: "应用系统的、规范的、可量化的方法来开发、运行和维护软件。它不仅仅是编码，而是将工程学应用于软件生命周期。" },
+        { term: "需求", definition: "1. 用户为解决问题或达到目标所需的条件/能力；2. 系统为满足合同、标准或规范所需的条件/能力；3. 上述条件的文档化表述。" },
+        { term: "需求工程", definition: "所有需求处理活动的总和，包括信息收集、分析、整合、记录及验证，旨在描述软件应用后的期望效应。" },
+        { term: "再工程", definition: "对现有软件系统进行深入的审查、改造和重构，在新的技术环境下焕发新生，同时保留核心业务逻辑和功能。" },
+        { term: "需求分析", definition: "本质是“还原”而非“翻译”。分析师像侦探，通过追问“为什么”，还原出业务全景图，并用异常分支和验收标准将其固化。" },
+        { term: "软件设计", definition: "关于软件对象的设计活动，既指规格说明，也指产生规格说明的过程。分为概要设计（整体模块结构）和详细设计（模块内部细化）。" },
+        { term: "体系结构", definition: "一个软件系统的骨架，规定了系统的计算部件以及这些部件之间的交互方式。" },
+        { term: "精神模型", definition: "用户在人机交互时头脑中的任务模型。人机交互设计必须基于精神模型进行隐喻设计，且需针对不同用户群体（新手、专家、熟练）进行差异化处理。" }
+    ];
+
+    let cards = [];
+    let currentIdx = 0;
+    let showingAnswer = false;
+
+    const termEl = document.getElementById('termDisplay');
+    const defEl = document.getElementById('defDisplay');
+    const cardContainer = document.getElementById('flashcard');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    const progressSpan = document.getElementById('progressCounter');
+
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function initCards() {
+        const initCopy = TERMS_DATA.map(item => ({ ...item }));
+        cards = shuffleArray(initCopy);
+        currentIdx = 0;
+        showingAnswer = false;
+        updateCardDisplay();
+        updateProgressText();
+    }
+
+    function updateCardDisplay() {
+        if (!cards.length) return;
+        const card = cards[currentIdx];
+        termEl.innerText = card.term;
+        defEl.innerText = card.definition;
+        defEl.style.display = showingAnswer ? 'block' : 'none';
+    }
+
+    function updateProgressText() {
+        progressSpan.innerText = cards.length ? `${currentIdx + 1} / ${cards.length}` : `0 / 0`;
+    }
+
+    function toggleAnswer() {
+        showingAnswer = !showingAnswer;
+        updateCardDisplay();
+    }
+
+    function nextCard() {
+        showingAnswer = false;
+        currentIdx = (currentIdx + 1) % cards.length;
+        updateCardDisplay();
+        updateProgressText();
+    }
+
+    function prevCard() {
+        showingAnswer = false;
+        currentIdx = (currentIdx - 1 + cards.length) % cards.length;
+        updateCardDisplay();
+        updateProgressText();
+    }
+
+    function randomShuffle() {
+        shuffleArray(cards);
+        currentIdx = 0;
+        showingAnswer = false;
+        updateCardDisplay();
+        updateProgressText();
+    }
+
+    function bindEvents() {
+        cardContainer.addEventListener('click', toggleAnswer);
+        prevBtn.addEventListener('click', prevCard);
+        nextBtn.addEventListener('click', nextCard);
+        shuffleBtn.addEventListener('click', randomShuffle);
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') { prevCard(); e.preventDefault(); }
+            else if (e.key === 'ArrowRight') { nextCard(); e.preventDefault(); }
+            else if (e.key === 'ArrowUp' || e.key === ' ') { toggleAnswer(); e.preventDefault(); }
+        });
+    }
+
+    initCards();
+    bindEvents();
+</script>
+</body>
+</html>

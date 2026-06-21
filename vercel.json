@@ -2,6 +2,7 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/", "destination": "/index.html" },
-    { "source": "/tools/flashcard/bianyi", "destination": "/tools/flashcard/bianyi.html" }
+    { "source": "/tools/flashcard/bianyi", "destination": "/tools/flashcard/bianyi.html" },
+    { "source": "/tools/flashcard/SEII", "destination": "/tools/flashcard/SEII.html" }
   ]
 }
