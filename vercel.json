@@ -3,6 +3,7 @@
   "rewrites": [
     { "source": "/", "destination": "/index.html" },
     { "source": "/tools/flashcard/bianyi", "destination": "/tools/flashcard/bianyi.html" },
-    { "source": "/tools/flashcard/SEII", "destination": "/tools/flashcard/SEII.html" }
+    { "source": "/tools/flashcard/SEII", "destination": "/tools/flashcard/SEII.html" },
+    { "source": "/tools/flashcard/OSOptions", "destination": "/tools/flashcard/OSOptions"}
   ]
 }

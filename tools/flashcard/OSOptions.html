@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>操作系统选择题测试（修复随机抽题）</title>
+    <style>
+        body {
+            background:#f5f5f5;
+            font-family: Arial, sans-serif;
+            padding:24px;
+        }
+        .container {
+            max-width:960px;
+            margin:auto;
+            background:#fff;
+            padding:24px;
+            border-radius:12px;
+        }
+        .ctrl-bar {
+            display:flex;
+            gap:12px;
+            margin-bottom:16px;
+            padding:12px;
+            background:#e8e8e8;
+            border-radius:10px;
+        }
+        .ctrl-bar button {
+            padding:8px 16px;
+            border:1px solid #999;
+            background:#f0f0f0;
+            cursor:pointer;
+            border-radius:4px;
+        }
+        .ctrl-bar button.active {
+            background:#333;
+            color:#fff;
+            border-color:#111;
+        }
+        .question-item {
+            background:#fafafa;
+            padding:18px;
+            margin-bottom:16px;
+            border-radius:10px;
+            border-left:4px solid #bbb;
+            list-style: none;
+        }
+        .option {
+            padding:8px 10px;
+            margin:6px 0;
+            border-radius:6px;
+            cursor:pointer;
+            display:flex;
+            gap:10px;
+            transition:0.2s;
+            border:1px solid transparent;
+        }
+        .option:hover {
+            background:#eee;
+        }
+        .option.selected {
+            background:#dbeafe;
+            border-color:#3b82f6;
+        }
+        .option.correct {
+            background:#dcfce7;
+            border-color:#22c55e;
+        }
+        .option.wrong {
+            background:#fee2e2;
+            border-color:#ef4444;
+        }
+        .result {
+            margin-top:8px;
+            font-size:13px;
+        }
+        .toolbar {
+            display:flex;
+            justify-content:space-between;
+            margin-bottom:20px;
+            padding:12px;
+            background:#f0f0f0;
+            border-radius:10px;
+        }
+        .score {
+            font-weight:bold;
+        }
+        ul {
+            padding:0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>操作系统选择题测试</h2>
+    <div class="ctrl-bar">
+        <button id="btnAll">全部题目</button>
+        <button id="btnRandom10">随机抽取10题</button>
+        <button id="btnReset">清空所有作答</button>
+    </div>
+    <div class="toolbar">
+        <div id="progress">进度：0/0</div>
+        <div class="score" id="score">得分：0</div>
+    </div>
+    <ul id="list"></ul>
+</div>
+<script>
+    // 【此处自行填入你的完整题目数组，本次留空占位】
+    const QUESTIONS = [
+        // 第一章 操作系统概述
+        {id:1,text:"操作系统是对______进行管理的软件。",options:["A 软件","B 硬件","C 计算机资源","D 应用程序"],answer:"C"},
+        {id:2,text:"配置了操作系统的机器是一台比原来的物理机器功能更强的计算机，这样的计算机只是一台逻辑上的计算机，称为_______计算机。",options:["A 并行","B 真实","C 虚拟","D 共享"],answer:"C"},
+        {id:3,text:"以下____不是一个操作系统环境。",options:["A Celeron","B Windows CE","C Linux","D Solaris"],answer:"A"},
+        {id:4,text:"该操作系统的系统响应时间的重要性超过协同资源的利用率，它被广泛地应用于卫星控制、导弹发射、工业控制、飞机订票业务等领域。",options:["A 分时操作系统","B 实时操作系统","C 批处理操作系统","D 多用户操作系统"],answer:"B"},
+        {id:5,text:"允许在一台主机上同时连接多个终端，各个用户可以通过各自的终端交互使用计算机，这样的操作系统是______。",options:["A 批处理操作系统","B 网络操作系统","C 分时操作系统","D 分布式操作系统"],answer:"C"},
+        {id:6,text:"如果分时系统的时间片一定，那么_____，则响应时间越长。",options:["A 内存越少","B 内存越多","C 用户数越少","D 用户数越多"],answer:"D"},
+        {id:7,text:"系统调用是______。",options:["A 用户编写的一个子程序","B 高级语言中的库程序","C 操作系统中的一条命令","D 操作系统向用户程序提供的接口"],answer:"D"},
+        {id:8,text:"实时操作系统必须在____内处理来自外部的事件。",options:["A 响应时间","B 周转时间","C 规定时间","D 调度时间"],answer:"C"},
+        {id:9,text:"关于实时系统说法正确的是____。",options:["A 是依赖人为干预的监督和控制系统","B 必须既要及时响应、快速处理，又要有高可靠性和安全性","C 强调系统资源的利用率","D 实质上是批处理系统和分时系统的结合"],answer:"B"},
+        {id:10,text:"用户程序的输入和输出操作实际上由______完成。",options:["A 程序设计语言","B 编译系统","C 操作系统","D 标准库程序"],answer:"C"},
+        {id:11,text:"在操作系统中，并发性是指________。",options:["A 若干个事件在不同时刻发生","B 若干个事件在同一时刻发生","C 若干个事件在同一时间间隔内发生","D 若干个事件在不同的时间间隔内发生"],answer:"C"},
+        {id:12,text:"若把操作系统看成计算机系统资源的管理者，下面的_____不属于操作系统所管理的资源。",options:["A 程序","B 主存","C CPU","D 中断"],answer:"D"},
+        {id:13,text:"多道程序设计是指______。",options:["A 在实时系统中并发运行多个程序","B 在分布系统中同一时刻运行多个程序","C 在一台处理机上同一时刻运行多个程序","D 在一台处理机上并发运行多个程序"],answer:"D"},
+        {id:14,text:"提高处理器资源利用率的关键技术是_____。",options:["A SPOOLing技术","B 虚拟技术","C 交换技术","D 多道程序设计技术"],answer:"D"},
+        {id:15,text:"操作系统中采用多道程序设计提高CPU和外部设备的_____。",options:["A 利用率","B 可靠性","C 稳定性","D 兼容性"],answer:"A"},
+        {id:16,text:"引入多道程序设计技术的前提条件之一是系统具有______。",options:["A 多个CPU","B 多个终端","C 中断功能","D 分时功能"],answer:"C"},
+        {id:17,text:"当计算机提供了管态和目态时，_____必须在管态下执行。",options:["A 从内存取数的指令","B 把运算结果送入内存的指令","C 算术运算指令","D 输入/输出指令"],answer:"D"},
+        {id:18,text:"当CPU执行操作系统代码时，称处理机处于______。",options:["A 自由态","B 目态","C 管态","D 就绪态"],answer:"C"},
+        {id:19,text:"特权指令是指_____。",options:["A 机器指令","B 其执行可能有损系统的安全性","C 控制指令","D 系统管理员可用的指令"],answer:"B"},
+        {id:20,text:"计算机系统中判断是否有中断事件发生应该在_____。",options:["A 进程切换时","B 执行完一条指令后","C 执行P操作后","D 由用户态转入核心态时"],answer:"B"},
+        // 第二章 进程与线程管理
+        {id:21,text:"优先权是在创建进程时确定的，确定之后在整个进程运行期间不再改变，该调度优先级称为____。",options:["A 先来先服务","B 静态","C 动态","D 短作业"],answer:"B"},
+        {id:22,text:"下列进程状态变化中，______变化是不可能发生的。",options:["A 运行->就绪","B 运行->等待","C 等待->运行","D 等待->就绪"],answer:"C"},
+        {id:23,text:"当_____时，进程从运行状态变为就绪状态。",options:["A 进程被调度程序选中","B 时间片到","C 等待某一事件","D 等待的事件发生"],answer:"B"},
+        {id:24,text:"进程管理中，当_____，进程从阻塞态变成就绪态。",options:["A 进程被进程调度程序选中","B 等待一个事件","C 等待的事件发生","D 时间片用完"],answer:"C"},
+        {id:25,text:"下面对进程的描述中，错误的是____。",options:["A 进程是动态的概念","B 进程执行需要处理机","C 进程是有生命周期的","D 进程是指令的集合"],answer:"D"},
+        {id:26,text:"下述步骤中，_____不是创建进程所必需的。",options:["A 由调度程序为进程分配CPU","B 建立一个进程控制块","C 为进程分配内存","D 将进程控制块链入就绪队列"],answer:"A"},
+        {id:27,text:"多道程序环境下，操作系统分配资源以____为基本单位。",options:["A 程序","B 指令","C 进程","D 线程"],answer:"C"},
+        {id:28,text:"下述哪一个选项体现了原语的主要特点____。",options:["A 并发性","B 异步性","C 共享性","D 不可分割性"],answer:"D"},
+        {id:29,text:"关于内核级线程，以下描述不正确的是____。",options:["A 内核可以将处理器调度直接分配给某个内核级线程","B 控制权从一个线程传送到另一个线程时不需要用户态-内核态-用户态的模式切换","C 可以将一个进程的多个线程分派到多个处理器，能够发挥多处理器并行工作的优势","D 建立和维护线程的数据结构及保存每个线程的入口"],answer:"B"},
+        {id:30,text:"一个进程被唤醒意味着____。",options:["A 该进程重新占有了CPU","B 它的优先权变为最大","C 其PCB移至等待队列队首","D 进程变为就绪状态"],answer:"D"},
+        {id:31,text:"在引入线程的操作系统中，资源分配的基本单位是____。",options:["A 程序","B 线程","C 作业","D 进程"],answer:"D"},
+        {id:32,text:"在下述关于父进程和子进程的叙述中，正确的是_____。",options:["A 父进程创建了子进程，因此父进程执行完了，子进程才能运行","B 父进程和子进程可以并发执行","C 撤销子进程时，应该同时撤销父进程","D 撤销父进程时，应该同时撤销子进程"],answer:"B"},
+        {id:33,text:"对进程的管理和控制使用____。",options:["A 指令","B 原语","C 信号量","D 信箱通信"],answer:"B"},
+        {id:34,text:"所谓“可重入”程序是指______。",options:["A 在执行过程中其代码自身会发生变化的程序","B 无限循环程序","C 不能够被多个程序同时调用的程序","D 能够被多个进程共享的程序"],answer:"D"},
+        {id:35,text:"原语是______。",options:["A 运行在用户态下的过程","B 操作系统的内核","C 可中断的指令序列","D 不可中断的指令序列"],answer:"D"},
+        {id:36,text:"在进程调度算法中，对短进程不利的是_____。",options:["A 短进程优先调度算法","B 先来先服务算法","C 高响应比优先算法","D 多级反馈队列调度算法"],answer:"B"},
+        {id:37,text:"一个可共享的程序在执行过程中是不能被修改的，这样的程序代码应该是____。",options:["A 封闭的代码","B 可重入代码","C 可再现代码","D 可执行代码"],answer:"B"},
+        {id:38,text:"在进程管理中，当_____时，进程状态从运行态转换到就绪态。",options:["A 进程被调度程序选中","B 时间片用完","C 等待某一事件发生","D 等待的事件发生"],answer:"B"},
+        {id:39,text:"Solaris的多线程的实现方式为______。",options:["A 纯内核级线程","B 纯用户级多线程","C 混合式","D 单线程结构进程"],answer:"C"},
+        {id:40,text:"在UNIX系统中运行main(){fork();fork();fork();}，最多可再产生出______进程。",options:["A 9","B 7","C 5","D 3"],answer:"B"},
+        {id:41,text:"设有n个进程共用一个相同的程序段(临界区)，如果每次最多允许m个进程(m≤n)同时进入临界区。则信号量的初值为_____。",options:["A m","B n","C m-n","D n-m"],answer:"A"},
+        {id:42,text:"某系统中有11台打印机，N个进程共享打印机资源，每个进程要求3台，当N不超过____时，系统不会死锁。",options:["A 4","B 5","C 6","D 7"],answer:"B"},
+        // 第三章 存储管理
+        {id:43,text:"静态重定位的时机是____。",options:["A 程序编译时","B 程序链接时","C 程序装入时","D 程序运行时"],answer:"C"},
+        {id:44,text:"能够装入内存任何位置的代码程序必须是____。",options:["A 可重入的","B 可定位的","C 可动态链接的","D 可静态链接的"],answer:"B"},
+        {id:45,text:"在可变式分区管理中，采用内存移动技术的目的是_____。",options:["A 合并空闲区","B 合并分配区","C 增加主存容量","D 便于地址转换"],answer:"A"},
+        {id:46,text:"在存储管理中，采用覆盖与交换技术的目的是____。",options:["A 减少程序占用的主存空间","B 物理上扩充主存容量","C 提高CPU效率","D 代码在主存中共享"],answer:"A"},
+        {id:47,text:"在分区存储管理中，下面的____最有可能使得高地址空间变成为大的空闲区。",options:["A 首次适应法","B 最佳适应法","C 最坏适应法","D 循环首次适应法"],answer:"C"},
+        {id:48,text:"以下哪种_____存储管理能提供虚存。",options:["A 覆盖","B 可重定位分区管理","C 页式","D 分区方式"],answer:"C"},
+        {id:49,text:"在分页式虚存中，分页由_____实现。",options:["A 程序员","B 编译器","C 系统调用","D 操作系统"],answer:"D"},
+        {id:50,text:"在虚拟页式存储管理方案中，下面_____完成将页面调入内存的工作。",options:["A 缺页中断处理","B 页面淘汰过程","C 工作集模型应用","D 紧缩技术利用"],answer:"A"},
+        {id:51,text:"采用_____不会产生内部碎片。",options:["A 分页式存储管理","B 分段式存储管理","C 固定分区式存储管理","D 段页式"],answer:"B"},
+        {id:52,text:"采用________存储管理不会产生外部碎片。",options:["A 分页式","B 分段式","C 可变分区","D 虚拟分段式"],answer:"A"},
+        {id:53,text:"一台机器有48位虚地址和32位物理地址，若页长为8KB，如果设计一个反置页表，则有______个页表项。",options:["A 2^16","B 2^32","C 2^19","D 2^35"],answer:"C"},
+        {id:54,text:"作业在执行中发生了缺页中断，经操作系统处理后，应该让其执行_____指令。",options:["A 被中断的前一条","B 被中断的后一条","C 被中断的","D 启动时的第一条"],answer:"C"},
+        {id:55,text:"在请求分页存储管理中，当访问的页面不在内存时，便产生缺页中断，缺页中断是属于____。",options:["A I/O中断","B 程序中断","C 访管中断","D 外中断"],answer:"B"},
+        {id:56,text:"通常所说的\"存储保护\"的基本含义是____。",options:["A 防止存储器硬件受损","B 防止程序在内存丢失","C 防止程序间相互越界访问","D 防止程序被人偷看"],answer:"C"},
+        {id:57,text:"LRU置换算法所基于的思想是____。",options:["A 在最近的过去用得少的在最近的将来也用得少","B 在最近的过去用得多的在最近的将来也用得多","C 在最近的过去很久未使用的在最近的将来会使用","D 在最近的过去很久未使用的在最近的将来也不会使用"],answer:"D"},
+        {id:58,text:"在下面关于虚拟存储器的叙述中，正确的是____。",options:["A 要求程序运行前必须全部装入内存且在运行过程中一直驻留在内存","B 要求程序运行前不必全部装入内存且在运行过程中不必一直驻留在内存","C 要求程序运行前不必全部装入内存但是在运行过程中必须一直驻留在内存","D 要求程序运行前必须全部装入内存但在运行过程中不必一直驻留在内存"],answer:"B"},
+        {id:59,text:"虚存的可行性基础是____。",options:["A 程序执行的离散性","B 程序执行的顺序性","C 程序执行的局部性","D 程序执行的并发性"],answer:"C"},
+        {id:60,text:"把逻辑地址转变为内存的物理地址的过程称作____。",options:["A 编译","B 连接","C 运行","D 重定位或地址映射"],answer:"D"},
+        {id:61,text:"假定某页式管理系统中，主存128KB，分成32块，块号为0,1,2,3,...,31；某作业有5块，其页号为0,1,2,3,4，被分别装入主存的3,8,4,6,9块中。有一逻辑地址为[3,70]。试求出相应的物理地址_______(其中方括号中的第一个元素为页号，第二个元素为页内地址，按十进制计算)。",options:["A 14646","B 24646","C 24576","D 34576"],answer:"B"},
+        {id:62,text:"页面替换算法_____有可能会产生Belady异常现象。",options:["A FIFO","B LRU","C OPT","D Clock"],answer:"A"},
+        // 第四章 I/O设备管理
+        {id:63,text:"按____分类可将设备分为块设备和字符设备。",options:["A 从属关系","B 操作特性","C 共享属性","D 信息交换单位"],answer:"D"},
+        {id:64,text:"CPU输出数据的速度远远高于打印机的打印速度，为了解决这一矛盾，可采用____。",options:["A 并行技术","B 覆盖技术","C 缓冲技术","D 虚存技术"],answer:"C"},
+        {id:65,text:"通过硬件和软件的功能扩充，把原来独占的设备改造成能为若干用户共享的设备，这种设备称为____。",options:["A 存储设备","B 系统设备","C 用户设备","D 虚拟设备"],answer:"D"},
+        {id:66,text:"通道又称I/O处理机，它用于实现____之间的信息传输。",options:["A 内存与外设","B CPU与外设","C 内存与外存","D CPU与外存"],answer:"A"},
+        {id:67,text:"为了使多个进程能有效地同时处理输入和输出，最好使用____结构的缓冲技术。",options:["A 缓冲池","B 循环缓冲","C 单缓冲","D 双缓冲"],answer:"A"},
+        {id:68,text:"如果I/O设备与存储设备进行数据交换不经过CPU来完成，这种数据交换方式是____。",options:["A 程序轮询","B 中断方式","C DMA方式","D 无条件存取方式"],answer:"C"},
+        {id:69,text:"在中断处理中，输入/输出中断可能是指____：①设备出错，②数据传输结束。",options:["A ①","B ②","C ①和②","D 都不是"],answer:"C"},
+        {id:70,text:"在采用SPOOLing技术的系统中，用户的打印结果首先被送到____。",options:["A 磁盘固定区域","B 内存固定区域","C 终端","D 打印机"],answer:"A"},
+        {id:71,text:"大多数低速设备都属于____设备。",options:["A 独享","B 共享","C 虚拟","D SPOOLing"],answer:"A"},
+        {id:72,text:"____是直接存取的存储设备。",options:["A 磁盘","B 磁带","C 打印机","D 键盘显示终端"],answer:"A"},
+        {id:73,text:"操作系统中的SPOOLing技术，实质是指____转化为共享设备的技术。",options:["A 虚拟设备","B 独占设备","C 脱机设备","D 块设备"],answer:"B"},
+        {id:74,text:"在操作系统中，____指的是一种硬件机制。",options:["A 通道技术","B 缓冲池","C SPOOLing技术","D 内存覆盖技术"],answer:"A"},
+        {id:75,text:"在操作系统中，用户程序申请使用I/O设备时，通常采用____。",options:["A 物理设备名","B 逻辑设备名","C 虚拟设备名","D 独占设备名"],answer:"B"},
+        {id:76,text:"采用假脱机技术，将磁盘的一部分作为公共缓冲区以代替打印机，用户对打印机的操作实际上是对磁盘的存储操作，用以代替打印机的部分是____。",options:["A 独占设备","B 共享设备","C 虚拟设备","D 一般物理设备"],answer:"C"},
+        {id:77,text:"___算法是设备分配常用的一种算法。",options:["A 短作业优先","B 最佳适应","C 先来先服务","D 首次适应"],answer:"C"},
+        {id:78,text:"将系统中的每一台设备按某种原则进行统一的编号，这些编号作为区分硬件和识别设备的代号，该编号称为设备的____。",options:["A 绝对号","B 相对号","C 类型号","D 符号名"],answer:"A"},
+        {id:79,text:"通道程序是____。",options:["A 由一系列机器指令组成","B 由一系列通道指令组成","C 可以由高级语言编写","D 就是通道控制器"],answer:"B"},
+        {id:80,text:"I/O软件的分层结构中，______负责将把用户提交的逻辑I/O请求转化为物理I/O操作的启动和执行。",options:["A 用户空间的I/O软件","B 独立于设备的I/O软件","C I/O中断处理程序","D 设备驱动程序"],answer:"D"},
+        {id:81,text:"使用SPOOLing系统的目的是为了提高______的使用效率。",options:["A 操作系统","B 内存","C CPU","D I/O设备"],answer:"D"},
+        {id:82,text:"下列算法中，用于磁盘移臂调度的是_____。",options:["A 时间片轮转法","B LRU算法","C 最短寻找时间优先算法","D 优先级高者优先算法"],answer:"C"},
+        // 第五章 文件管理
+        {id:83,text:"Unix系统中，文件的索引结构存放在_________中。",options:["A 超级块","B inode节点","C 目录项","D 空闲块"],answer:"B"},
+        {id:84,text:"操作系统中对文件进行管理的部分叫做____。",options:["A 数据库系统","B 文件系统","C 检索系统","D 数据存储系统"],answer:"B"},
+        {id:85,text:"为了解决不同用户文件的“命名冲突”问题，通常在文件系统中采用____。",options:["A 约定的方法","B 多级目录","C 路径","D 索引"],answer:"B"},
+        {id:86,text:"无结构文件的含义是________。",options:["A 变长记录的文件","B 索引文件","C 索引顺序文件","D 流式文件"],answer:"D"},
+        {id:87,text:"下列文件中不属于物理文件的是_______。",options:["A 记录式文件","B 连续文件","C 链接文件","D 索引文件"],answer:"A"},
+        {id:88,text:"文件系统的主要目的是____。",options:["A 实现对文件的按名存取","B 实现虚拟存储","C 提高外存的读写速度","D 用于存储系统文件"],answer:"A"},
+        {id:89,text:"下列文件中属于逻辑结构的文件是____文件。",options:["A 连续文件","B 系统文件","C 库文件","D 流式文件"],answer:"D"},
+        {id:90,text:"文件系统采用多级目录结构后，对于不同用户的文件，其文件名____。",options:["A 应该相同","B 应该不同","C 可以相同也可以不同","D 受系统约束"],answer:"C"},
+        {id:91,text:"文件目录的主要作用是________。",options:["A 按名存取","B 提高速度","C 节省空间","D 提高外存利用率"],answer:"A"},
+        {id:92,text:"在文件系统中，文件的不同物理结构有不同的优缺点。在下列文件的物理结构中，____具有直接读写文件任意一个记录的能力，又提高了文件存储空间的利用率。",options:["A 顺序结构","B 链接结构","C Hash结构","D 索引结构"],answer:"D"},
+        {id:93,text:"文件系统用____组织文件。",options:["A 堆栈","B 指针","C 目录","D 路径"],answer:"C"},
+        {id:94,text:"文件路径名是指____。",options:["A 文件名和文件扩展名","B 一系列的目录文件名和该文件的文件名","C 从根目录到文件所经历的路径中的各符号名的集合","D 目录文件名和文件名的集合"],answer:"C"},
+        {id:95,text:"一个文件的相对路径名是从____开始，逐步沿着各级子目录追溯，最后到指定文件的整个通路上所有子目录名组成的一个字符串。",options:["A 当前目录","B 根目录","C 多级目录","D 二级目录"],answer:"A"},
+        {id:96,text:"对一个文件的访问，常由____共同限制。",options:["A 用户访问权限和文件属性","B 用户访问权限和用户优先级","C 优先级和文件属性","D 文件属性的口令"],answer:"A"},
+        {id:97,text:"存放在磁盘上的文件____。",options:["A 既可随机访问，又可顺序访问","B 只能随机访问","C 只能顺序访问","D 不能随机访问"],answer:"A"},
+        {id:98,text:"在文件系统中，位示图可用于____。",options:["A 文件目录的查找","B 磁盘空间的管理","C 内存空间的共享","D 实现文件的保护和保密"],answer:"B"},
+        {id:99,text:"常用的文件存取方法有两种：顺序存取和____存取。",options:["A 流式","B 串联","C 顺序","D 随机"],answer:"D"},
+        {id:100,text:"Unix系统中，通过_____实现文件系统的按名存取功能。",options:["A 超级块","B inode节点","C 目录项","D 空闲块"],answer:"C"},
+        {id:101,text:"Unix文件系统中，打开文件的系统调用open输入参数包含______。",options:["A 文件描述符","B 文件名","C inode号","D inode"],answer:"B"},
+        {id:102,text:"Unix文件系统中，打开文件的系统调用open返回值是________。",options:["A 文件描述符(字)","B 文件名","C inode号","D inode"],answer:"A"},
+        {id:103,text:"在Unix文件系统的主存活动inode数据结构中，i_count表示______。",options:["A 不同进程通过同一个系统打开文件表项共享一个文件的情况","B 不同进程通过不同系统打开文件表项共享一个文件的情况","C 相同进程通过不同系统打开文件表项共享一个文件的情况","D 相同进程通过相同系统打开文件表项共享一个文件的情况"],answer:"B"}
+    ];
+
+    // 全局状态
+    const state = {
+        selected: {},        // 全局作答记录，切换模式不丢失
+        mode: "all",         // all / random10
+        randomPool: []       // 保存当前随机10题池
+    };
+
+    // 洗牌算法
+    function shuffle(arr) {
+        const copy = [...arr];
+        for (let i = copy.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+    }
+
+    // 获取当前渲染题目列表
+    function getRenderList() {
+        if (state.mode === "random10") {
+            // 随机模式：每次点击按钮重新生成10题池
+            if (state.randomPool.length !== 10) {
+                state.randomPool = shuffle(QUESTIONS).slice(0, 10);
+            }
+            return state.randomPool;
+        } else {
+            // 全部模式：直接返回完整题库
+            state.randomPool = [];
+            return QUESTIONS;
+        }
+    }
+
+    // 页面渲染
+    function render() {
+        const list = document.getElementById("list");
+        list.innerHTML = "";
+        const renderQs = getRenderList();
+        let rightCount = 0;
+
+        renderQs.forEach(q => {
+            const li = document.createElement("li");
+            li.className = "question-item";
+            const userSelect = state.selected[q.id];
+
+            // 渲染选项
+            let optHtml = "";
+            q.options.forEach(opt => {
+                const letter = opt[0];
+                let cls = "option";
+                if (userSelect === letter) cls += " selected";
+                if (userSelect) {
+                    if (letter === q.answer) cls += " correct";
+                    if (userSelect === letter && userSelect !== q.answer) cls += " wrong";
+                }
+                optHtml += `<div class="${cls}" data-id="${q.id}" data-opt="${letter}">${opt}</div>`;
+            });
+
+            const isRight = userSelect === q.answer;
+            if (isRight) rightCount++;
+
+            li.innerHTML = `
+            <div><b>${q.id}. </b>${q.text}</div>
+            <div>${optHtml}</div>
+            <div class="result">
+                ${userSelect ? (isRight ? "✅ 正确" : `❌ 错误，正确答案：${q.answer}`) : "未作答"}
+            </div>
+        `;
+            list.appendChild(li);
+        });
+
+        // 更新统计
+        document.getElementById("score").innerText = `得分：${rightCount} / ${renderQs.length}`;
+        const answered = Object.keys(state.selected).filter(id => renderQs.some(q => q.id == id)).length;
+        document.getElementById("progress").innerText = `进度：${answered} / ${renderQs.length}`;
+
+        // 按钮激活样式
+        document.getElementById("btnAll").classList.toggle("active", state.mode === "all");
+        document.getElementById("btnRandom10").classList.toggle("active", state.mode === "random10");
+    }
+
+    // 切换全部题目
+    document.getElementById("btnAll").onclick = () => {
+        state.mode = "all";
+        render();
+    };
+
+    // 切换随机10题，每次点击重新随机一套
+    document.getElementById("btnRandom10").onclick = () => {
+        state.mode = "random10";
+        state.randomPool = shuffle(QUESTIONS).slice(0, 10);
+        render();
+    };
+
+    // 清空全部作答
+    document.getElementById("btnReset").onclick = () => {
+        state.selected = {};
+        render();
+    };
+
+    // 选项点击事件
+    document.addEventListener("click", e => {
+        const optDom = e.target.closest(".option");
+        if (!optDom) return;
+        const qid = optDom.dataset.id;
+        const selOpt = optDom.dataset.opt;
+        state.selected[qid] = selOpt;
+        render();
+    });
+
+    // 初始化渲染
+    render();
+</script>
+</body>
+</html>
